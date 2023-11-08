@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Job Seeker</title>
+    <link rel="icon" type="image/png" href="image/logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Admin Job Seeker</h1>
+        <form id="jobForm">
+            <div class="form-group">
+                <label for="job_image">Gambar Pekerjaan:</label>
+                <input type="file" class="form-control" id="job_image" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label for="job_name">Nama Pekerjaan:</label>
+                <input type="text" class="form-control" id="job_name">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Lokasi:</label>
+                <input type="text" class="form-control" id="location">
+            </div>
+
+            <div class="form-group">
+                <label for="salary">Gaji:</label>
+                <input type="text" class="form-control" id="salary">
+            </div>
+
+            <div class="form-group">
+                <label for="working_time">Waktu Kerja:</label>
+                <input type="text" class="form-control" id="working_time">
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">Unggah Lowongan</button>
+        </form>
+    </div>
+
+    <!-- Ganti Firebase SDK Anda dengan Firebase versi 8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-storage.js"></script>
+    <script>
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyBroEr96qj43CqVast2VLpGLSXDoJUgHaU",
+            authDomain: "job-seeker-15f1f.firebaseapp.com",
+            projectId: "job-seeker-15f1f",
+            storageBucket: "gs://job-seeker-15f1f.appspot.com",
+            appId: "1:345756093712:web:250f4320d98d9acf39e995"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+
+    // Referensi Firestore
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // Menangani pengiriman formulir
+    const jobForm = document.getElementById('jobForm');
+    jobForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const job_image = document.getElementById('job_image').files[0];
+        const job_name = document.getElementById('job_name').value;
+        const location = document.getElementById('location').value;
+        const salary = document.getElementById('salary').value;
+        const working_time = document.getElementById('working_time').value;
+
+        // Mengunggah gambar pekerjaan ke Firebase Storage
+        const storageRef = storage.ref('job_images/' + job_image.name);
+        storageRef.put(job_image)
+            .then((snapshot) => {
+                return snapshot.ref.getDownloadURL();
+            })
+            .then((downloadURL) => {
+                // Simpan data pekerjaan ke Firestore bersama dengan URL gambar
+                return db.collection('job_vacancies').add({
+                    job_image: downloadURL,
+                    job_name: job_name,
+                    location: location,
+                    salary: salary,
+                    working_time: working_time
+                });
+            })
+            .then(() => {
+                alert('Data pekerjaan berhasil diunggah.');
+                jobForm.reset();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengunggah data pekerjaan.');
+            });
+    });
+</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
